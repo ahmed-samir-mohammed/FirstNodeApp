@@ -1,4 +1,3 @@
-// const productList = require('../data/products')
 const { validationResult } = require('express-validator')
 const Product = require('../models/product.model')
 
@@ -16,7 +15,7 @@ const getProduct = async (req, res) => {
             ? res.status(404).json({ message: 'Product not found' })
             : res.json(product)
     } catch (error) {
-        return res.status(400).json({ message: 'Invalid ID' })
+        return res.status(400).json({ message: 'Invalid ID' || error.message })
     }
 }
 
