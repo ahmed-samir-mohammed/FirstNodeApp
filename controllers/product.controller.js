@@ -1,56 +1,52 @@
-const { validationResult } = require('express-validator')
-const Product = require('../models/product.model')
+import { validationResult } from 'express-validator'
+import jsend from 'jsend'
+import Product from '../models/product.model.js'
+import asyncWrapper from '../middlewares/asyncWrapper.js'
+import { errHandeler } from '../utils/appErrorHandler.js'
 
 // Get All Products
 const getAllProducts = async (req, res) => {
-    const data = await Product.find()
-    res.json(data)
+    const query = req.query
+    const pageNo = +query.pageNo || 1
+    const pageSize = +query.pageSize || 2
+    let skip = (pageNo - 1) * pageSize // => Count Of Items
+
+    const data = await Product.find({}, { "__v": false }).limit(pageSize).skip(skip)
+    res.json(jsend.success(data))
 }
 
 // Get Single Product
-const getProduct = async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.id)
-        !product
-            ? res.status(404).json({ message: 'Product not found' })
-            : res.json(product)
-    } catch (error) {
-        return res.status(400).json({ message: 'Invalid ID' || error.message })
-    }
-}
+const getProduct = asyncWrapper(async (req, res, next) => {
+    const product = await Product.findById(req.params.id, { "__v": false })
+    if (!product) {
+        return next(errHandeler('Product not found', 'fail', 404))
+    } else res.json(jsend.success(product))
+})
 
 // Add New Product
-const addProduct = async (req, res) => {
+const addProduct = asyncWrapper(async (req, res, next) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() })
+        return next(errHandeler(errors.array(), 'fail', 400 ))
     }
     const newProduct = new Product(req.body)
     await newProduct.save()
-    res.status(201).json(newProduct)
-}
+    res.status(201).json(jsend.success(newProduct))
+})
 
 // Update Product
-const updateProduct = async (req, res) => {
-    try {
-        const product = await Product.updateOne({ _id: req.params.id }, {$set: {...req.body}})
-        return res.status(200).json(product)
-    } catch (error) {
-        return res.status(400).json({ error: error })
-    }
-}
+const updateProduct = asyncWrapper(async (req, res) => {
+    const product = await Product.updateOne({ _id: req.params.id }, { $set: { ...req.body } })
+    return res.status(200).json(jsend.success(product))
+})
 
 // Delete Product
-const deleteProduct = async (req, res) => {
-    try {
-        const product = await Product.deleteOne({ _id: req.params.id })
-        return res.status(200).json(product)
-    } catch (error) {
-        return res.status(400).json({ error: error })
-    }
-}
+const deleteProduct = asyncWrapper(async (req, res) => {
+    const product = await Product.deleteOne({ _id: req.params.id })
+    return res.status(200).json(jsend.success(product))
+})
 
-module.exports = {
+export {
     getAllProducts,
     getProduct,
     addProduct,

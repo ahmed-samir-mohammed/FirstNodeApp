@@ -1,13 +1,13 @@
-const { body } = require('express-validator')
+import { body } from 'express-validator'
 
-function validator(filed) {
+function validator(filed, charSize) {
     return [
         body(filed)
             .notEmpty()
             .withMessage(`${filed} is Req`)
-            .isLength({ min: 5 })
-            .withMessage(`${filed} is shold be 5 char`)
+            .isLength({ min: charSize })
+            .withMessage(`${filed} is shold be ${charSize} char`)
     ]
 }
 
-module.exports = validator
+export default validator

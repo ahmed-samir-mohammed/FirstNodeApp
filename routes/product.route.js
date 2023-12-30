@@ -1,16 +1,16 @@
-const express = require('express');
-const { body } = require('express-validator')
-const { getAllProducts, addProduct, deleteProduct, updateProduct, getProduct } = require('../controllers/product.controller')
-const validator = require('../middlewares/product.validation')
-const router = express.Router();
+import { Router } from 'express';
+import { body } from 'express-validator';
+import { addProduct, deleteProduct, getAllProducts, getProduct, updateProduct } from '../controllers/product.controller.js';
+import validator from '../middlewares/product.validation.js';
+export const productRouter = Router();
 
-router.route('/')
+productRouter.route('/')
     .get(getAllProducts)
-    .post([validator('title'), body('price').notEmpty()], addProduct)
+    .post([validator('title', 5), body('price').notEmpty()], addProduct)
 
-router.route('/:id')
+productRouter.route('/:id')
     .get(getProduct)
-    .patch(updateProduct)
+    .put(updateProduct)
     .delete(deleteProduct)
 
-module.exports = router;
+// export default router;
