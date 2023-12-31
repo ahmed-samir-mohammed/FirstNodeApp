@@ -24,9 +24,10 @@ app.all('*', (req, res, next) => {
 })
 
 // Gloabl Error handeler
-app.use((error, req, res, next) => {;
+app.use((error, req, res, next) => {
+    ;
     res.status(error.statusCode || 500).json(
-        error.status == 'fail' 
+        error.status == 'fail'
             ? jsend.fail(error.message)
             : jsend.error(error.message)
     )

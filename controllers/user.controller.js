@@ -4,7 +4,7 @@ import asyncWrapper from '../middlewares/asyncWrapper.js'
 import { errHandeler } from '../utils/appErrorHandler.js'
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt'
-// import { jwt } from  'jsonwebtoken'
+import { sign } from 'jsonwebtoken-esm'
 
 
 // Register Users
@@ -21,7 +21,13 @@ const register = asyncWrapper(async (req, res, next) => {
         email,
         password: hashedPassword
     })
-    // jwt.sign()
+    const token = await sign(
+        { email: newUser.email, id: newUser._id },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: '3h' },
+    )
+    console.log(token)
+    return
     await newUser.save();
     res.status(201).json(jsend.success(newUser))
 })
@@ -61,16 +67,16 @@ const addNewUser = asyncWrapper(async (req, res, next) => {
     console.log(req.body)
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return next(errHandeler(errors.array(), 'fail', 400 ))
+        return next(errHandeler(errors.array(), 'fail', 400))
     }
-    const newUser = new Users(req.body, {"__v": false})
+    const newUser = new Users(req.body, { "__v": false })
     await newUser.save()
     res.status(201).json(jsend.success(newUser))
 })
 
 // Update User
 const updateUser = asyncWrapper(async (req, res) => {
-    const user = await Users.updateOne({ _id: req.params.id }, { $set: {...req.body } })
+    const user = await Users.updateOne({ _id: req.params.id }, { $set: { ...req.body } })
     return res.status(200).json(jsend.success(user))
 })
 
