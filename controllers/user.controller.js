@@ -62,17 +62,6 @@ const getUser = asyncWrapper(async (req, res, next) => {
     } else res.json(jsend.success(user))
 })
 
-// Add New User
-const addNewUser = asyncWrapper(async (req, res, next) => {
-    console.log(req.body)
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-        return next(errHandeler(errors.array(), 'fail', 400))
-    }
-    const newUser = new Users(req.body, { "__v": false })
-    await newUser.save()
-    res.status(201).json(jsend.success(newUser))
-})
 
 // Update User
 const updateUser = asyncWrapper(async (req, res) => {
@@ -91,7 +80,6 @@ export {
     login,
     getAllUsers,
     getUser,
-    addNewUser,
     updateUser,
     deleteUser
 }
