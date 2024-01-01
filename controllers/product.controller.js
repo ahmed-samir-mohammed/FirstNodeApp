@@ -27,7 +27,7 @@ const getProduct = asyncWrapper(async (req, res, next) => {
 const addProduct = asyncWrapper(async (req, res, next) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return next(errHandeler(errors.array(), 'fail', 400 ))
+        return next(errHandeler(errors.array(), 'fail', 400))
     }
     const newProduct = new Product(req.body)
     await newProduct.save()

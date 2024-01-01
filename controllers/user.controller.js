@@ -4,7 +4,7 @@ import asyncWrapper from '../middlewares/asyncWrapper.js'
 import { errHandeler } from '../utils/appErrorHandler.js'
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import { genrateJWT } from '../utils/genrateJWT.js';
 
 
 // Register Users
@@ -33,13 +33,8 @@ const login = asyncWrapper(async (req, res, next) => {
     if (!user) return next(errHandeler('User not found', 'fail', 400))
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) return next(errHandeler('Invalid password', 'fail', 500))
-    const token = await jwt.sign(
-        { email: user.email, id: user._id },
-        process.env.JWT_SECRET_KEY,
-        { expiresIn: '3h' },
-    )
-    user.token = token
-    res.json(jsend.success(user.token))
+    const token = await genrateJWT({ email: user.email, id: user._id })
+    res.json(jsend.success({ token: token }))
 })
 
 // Get All Userss
