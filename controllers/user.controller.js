@@ -21,13 +21,6 @@ const register = asyncWrapper(async (req, res, next) => {
         email,
         password: hashedPassword
     })
-    const token = await jwt.sign(
-        { email: newUser.email, id: newUser._id },
-        process.env.JWT_SECRET_KEY,
-        { expiresIn: '3h' },
-    )
-    console.log(token)
-    return
     await newUser.save();
     res.status(201).json(jsend.success(newUser))
 })
@@ -40,7 +33,13 @@ const login = asyncWrapper(async (req, res, next) => {
     if (!user) return next(errHandeler('User not found', 'fail', 400))
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) return next(errHandeler('Invalid password', 'fail', 500))
-    res.json(jsend.success('Login success'))
+    const token = await jwt.sign(
+        { email: user.email, id: user._id },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: '3h' },
+    )
+    user.token = token
+    res.json(jsend.success(user.token))
 })
 
 // Get All Userss
@@ -61,7 +60,6 @@ const getUser = asyncWrapper(async (req, res, next) => {
         return next(errHandeler('User not found', 'fail', 404))
     } else res.json(jsend.success(user))
 })
-
 
 // Update User
 const updateUser = asyncWrapper(async (req, res) => {
