@@ -4,7 +4,7 @@ import asyncWrapper from '../middlewares/asyncWrapper.js'
 import { errHandeler } from '../utils/appErrorHandler.js'
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt'
-import { sign } from 'jsonwebtoken-esm'
+import jwt from 'jsonwebtoken'
 
 
 // Register Users
@@ -21,7 +21,7 @@ const register = asyncWrapper(async (req, res, next) => {
         email,
         password: hashedPassword
     })
-    const token = await sign(
+    const token = await jwt.sign(
         { email: newUser.email, id: newUser._id },
         process.env.JWT_SECRET_KEY,
         { expiresIn: '3h' },
