@@ -50,7 +50,7 @@ const getAllUsers = asyncWrapper(async (req, res) => {
 
 // Get Single User
 const getUser = asyncWrapper(async (req, res, next) => {
-    const user = await Users.findById(req.params.id, { "__v": false })
+    const user = await Users.findById(req.params.id, { "__v": false, "password": false })
     if (!user) {
         return next(errHandeler('User not found', 'fail', 404))
     } else res.json(jsend.success(user))
@@ -64,8 +64,13 @@ const updateUser = asyncWrapper(async (req, res) => {
 
 // Delete User 
 const deleteUser = asyncWrapper(async (req, res) => {
-    const user = await Users.deleteOne({ _id: req.params.id })
-    return res.status(200).json(jsend.success(user))
+    const exist = await Users.findById(req.params.id)
+    if (exist) {
+        const user = await Users.deleteOne({ _id: req.params.id })
+        return res.status(200).json(jsend.success(user))
+    } else {
+        return errHandeler("User Not Found", "error", 400)
+    }
 })
 
 export {
