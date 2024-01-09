@@ -42,7 +42,7 @@ const updateProduct = asyncWrapper(async (req, res) => {
 
 // Delete Product
 const deleteProduct = asyncWrapper(async (req, res) => {
-    const product = await Product.deleteOne({ _id: req.params.id })
+    const product = await Product.findOneAndDelete({ _id: req.params.id }).select({ "__v": false })
     return res.status(200).json(jsend.success(product))
 })
 

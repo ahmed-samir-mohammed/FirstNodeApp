@@ -2,7 +2,6 @@ import jsend from 'jsend'
 import Users from '../models/user.model.js'
 import asyncWrapper from '../middlewares/asyncWrapper.js'
 import { errHandeler } from '../utils/appErrorHandler.js'
-import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt'
 import { genrateJWT } from '../utils/genrateJWT.js';
 
@@ -22,7 +21,7 @@ const register = asyncWrapper(async (req, res, next) => {
         password: hashedPassword
     })
     await newUser.save();
-    res.status(201).json(jsend.success(newUser))
+    res.status(201).json(jsend.success("Done"))
 })
 
 // login Users
@@ -63,13 +62,12 @@ const updateUser = asyncWrapper(async (req, res) => {
 })
 
 // Delete User 
-const deleteUser = asyncWrapper(async (req, res) => {
-    const exist = await Users.findById(req.params.id)
-    if (exist) {
-        const user = await Users.deleteOne({ _id: req.params.id })
+const deleteUser = asyncWrapper(async (req, res, next) => {
+    const user = await Users.findOneAndDelete({ _id: req.params.id }).select({ "__v": false, "password": false })
+    if (user) {
         return res.status(200).json(jsend.success(user))
     } else {
-        return errHandeler("User Not Found", "error", 400)
+        return next(errHandeler("User Not Found", "error", 400))
     }
 })
 
